@@ -1,5 +1,6 @@
 use extendr_api::{extendr, prelude::*, rprintln, Error, Rinternals};
 use polars::prelude::{self as pl, IntoLazy};
+use polars::series::IntoSeries;
 use std::result::Result;
 
 pub mod read_csv;
@@ -19,7 +20,6 @@ use wrap_errors::*;
 
 use crate::utils::extendr_concurrent::concurrent_handler;
 use crate::utils::r_result_list;
-use crate::utils::wrappers::strpointer_to_;
 
 #[extendr]
 #[derive(Debug, Clone)]
@@ -48,23 +48,26 @@ fn handle_thread_r_requests(
 
             let rseries_ptr = series_udf_handler.call(pairlist!(f = f, rs = Series(s)))?;
 
-            let rseries_ptr_str = rseries_ptr.as_str().ok_or_else(|| {
-                extendr_api::error::Error::Other(format!(
-                    "failed to run user function because: {:?}",
-                    rseries_ptr
-                ))
-            })?;
+            // let rseries_ptr_str = rseries_ptr.as_str().ok_or_else(|| {
+            //     extendr_api::error::Error::Other(format!(
+            //         "failed to run user function because: {:?}",
+            //         rseries_ptr
+            //     ))
+            // })?;
 
-            //safety relies on private minipolars:::series_udf_handler only passes Series pointers.
-            let x = unsafe {
-                let x: &mut Series = strpointer_to_(rseries_ptr_str)?;
-                x
-            };
+            // //safety relies on private minipolars:::series_udf_handler only passes Series pointers.
+            // let x = unsafe {
+            //     let x: &mut Series = strpointer_to_(rseries_ptr_str)?;
+            //     x
+            // };
+
+            let res: extendr_api::Result<ExternalPtr<Series>> = rseries_ptr.try_into(); // this fails
+            let x = res.unwrap().0 .0.clone().into_series();
 
             //try into cast robj into point to expected type
 
             //unwrap to series
-            let s = x.clone().0;
+            let s = x;
 
             Ok(s)
         },

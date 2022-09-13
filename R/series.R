@@ -76,10 +76,14 @@ print.Series = \(x) {
 
 
 
+# Series_udf_handler = function(f,rs) {
+#   fps = Series_constructor(f(rs))
+#   rs_ptr_adr = xptr::xptr_address(fps)
+#   rs_ptr_adr
+# }
+
 Series_udf_handler = function(f,rs) {
-  fps = Series_constructor(f(rs))
-  rs_ptr_adr = xptr::xptr_address(fps)
-  rs_ptr_adr
+  Series_constructor(f(rs))
 }
 
 
