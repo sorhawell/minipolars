@@ -50,25 +50,25 @@ fn handle_thread_r_requests(
 
             let rseries_ptr = series_udf_handler.call(pairlist!(f = f, rs = Series(s)))?;
 
-            let rseries_ptr_str = rseries_ptr.as_str().ok_or_else(|| {
-                extendr_api::error::Error::Other(format!(
-                    "failed to run user function because: {:?}",
-                    rseries_ptr
-                ))
-            })?;
+            // let rseries_ptr_str = rseries_ptr.as_str().ok_or_else(|| {
+            //     extendr_api::error::Error::Other(format!(
+            //         "failed to run user function because: {:?}",
+            //         rseries_ptr
+            //     ))
+            // })?;
 
-            //safety relies on private minipolars:::series_udf_handler only passes Series pointers.
-            let x = unsafe {
-                let x: &mut Series = strpointer_to_(rseries_ptr_str)?;
-                x
-            };
+            // //safety relies on private minipolars:::series_udf_handler only passes Series pointers.
+            // let x = unsafe {
+            //     let x: &mut Series = strpointer_to_(rseries_ptr_str)?;
+            //     x
+            // };
 
-            //try into cast robj into point to expected type
+            let res: extendr_api::Result<ExternalPtr<Series>> = rseries_ptr.try_into(); // this fails
+            dbg!(&res);
+            let y = res.unwrap().0.clone();
+            dbg!(&y);
 
-            //unwrap to series
-            let s = x.clone().0;
-
-            Ok(s)
+            Ok(y)
         },
         &CONFIG,
     );

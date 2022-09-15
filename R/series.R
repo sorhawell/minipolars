@@ -109,9 +109,7 @@ Series_ops_add = function(name) {
 
 
 Series_udf_handler = function(f,rs) {
-  fps = Series_constructor(f(rs))
-  rs_ptr_adr = xptr::xptr_address(fps)
-  rs_ptr_adr
+  Series_constructor(f(rs))
 }
 
 
